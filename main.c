@@ -3,10 +3,10 @@
 #include <time.h>
 
 
-#define NUM_FISH 1
+#define NUM_FISH 50
 
 typedef struct Fish {
-    Texture2D picture;
+    float size;
     Vector2 pos;
     int angle;
     bool toleft;
@@ -21,13 +21,14 @@ int main(void){
     InitWindow(swidth, sheight, "Aquarium");
 
     Image basefish = LoadImage("fish.png");
-    int Fishsize = (rand() % (200 - 100 + 1)) + 100;
-    ImageResizeNN(&basefish, Fishsize, Fishsize);
-    Texture2D fish = LoadTextureFromImage(basefish);
+    Texture2D fishTexture = LoadTextureFromImage(basefish);
     struct Fish Fishes[NUM_FISH];
     for(int i = 0; i < NUM_FISH; i++){
-        Fishes[i].picture = fish;
-        Fishes[i].pos = (Vector2){ 500, 500};
+        Fishes[i].size = (float)((rand() % (200 - 100 + 1)) + 100);
+        Fishes[i].pos = (Vector2){ 
+            (float)(rand() % (int)(1920 - Fishes[i].size)), 
+            (float)(rand() % (int)(1080 - Fishes[i].size)) 
+        };
     };
     SetTargetFPS(60);
     ToggleFullscreen();
@@ -36,8 +37,10 @@ int main(void){
         BeginDrawing();
         ClearBackground(bgcolor);
         for(int i = 0; i < NUM_FISH; i++){
-            DrawTextureV(Fishes[i].picture, Fishes[i].pos, WHITE);
-        };
+            Rectangle sourceRec = { 0.0f, 0.0f, (float)fishTexture.width, (float)fishTexture.height };   
+            Rectangle destRec = { Fishes[i].pos.x, Fishes[i].pos.y, Fishes[i].size, Fishes[i].size }; 
+            Vector2 origin = { 0.0f, 0.0f };
+            DrawTexturePro(fishTexture, sourceRec, destRec, origin, (float)Fishes[i].angle, WHITE);        };
         EndDrawing();
     }
     CloseWindow();
