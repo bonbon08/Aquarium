@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
-
 
 #define NUM_FISH 50
 
@@ -10,11 +10,13 @@ typedef struct Fish {
     Vector2 pos;
     int angle;
     bool toleft;
+    bool totop;
+    float speed; 
 } Fish;
 
 int main(void){
-    int swidth = 1920;//GetScreenWidth();
-    int sheight = 1080;//GetScreenHeight();
+    int swidth = 1920;
+    int sheight = 1080;
     srand(time(NULL));
     Color bgcolor = {81, 141, 214, 255};
     
@@ -22,25 +24,83 @@ int main(void){
 
     Image basefish = LoadImage("fish.png");
     Texture2D fishTexture = LoadTextureFromImage(basefish);
+    UnloadImage(basefish); 
     struct Fish Fishes[NUM_FISH];
     for(int i = 0; i < NUM_FISH; i++){
         Fishes[i].size = (float)((rand() % (200 - 100 + 1)) + 100);
         Fishes[i].pos = (Vector2){ 
-            (float)(rand() % (int)(1920 - Fishes[i].size)), 
-            (float)(rand() % (int)(1080 - Fishes[i].size)) 
+            (float)(rand() % (int)(swidth - Fishes[i].size)),
+            (float)(rand() % (int)(sheight - Fishes[i].size)) 
         };
-    };
+        Fishes[i].speed = (float)((rand() % (3 - 1 + 1)) + 1);
+        
+        Fishes[i].angle = rand() % 26; 
+        
+        Fishes[i].toleft = (rand() % 2 == 0);
+        Fishes[i].totop = (rand() % 2 == 0);
+    }
+
     SetTargetFPS(60);
     ToggleFullscreen();
+
     while (!WindowShouldClose())
     {   
         BeginDrawing();
         ClearBackground(bgcolor);
+        
         for(int i = 0; i < NUM_FISH; i++){
+            float radians = Fishes[i].angle * DEG2RAD;
+            float speedX = fabsf(cosf(radians) * Fishes[i].speed);
+            float speedY = fabsf(sinf(radians) * Fishes[i].speed);
+            if (Fishes[i].toleft == false){
+                if (Fishes[i].pos.x + speedX < swidth - Fishes[i].size) {
+                    Fishes[i].pos.x += speedX;
+                }
+                else {
+                    Fishes[i].toleft = true;
+                }
+            } else {
+                if (Fishes[i].pos.x - speedX > 0) { 
+                    Fishes[i].pos.x -= speedX;
+                }
+                else {
+                    Fishes[i].toleft = false;
+                }
+            }
+            if (Fishes[i].totop == false){
+                if (Fishes[i].pos.y + speedY < sheight - Fishes[i].size) {
+                    Fishes[i].pos.y += speedY;
+                }
+                else {
+                    Fishes[i].totop = true;
+                }
+            } else {
+                if (Fishes[i].pos.y - speedY > 0) {
+                    Fishes[i].pos.y -= speedY;
+                }
+                else {
+                    Fishes[i].totop = false;
+                }
+            }
             Rectangle sourceRec = { 0.0f, 0.0f, (float)fishTexture.width, (float)fishTexture.height };   
             Rectangle destRec = { Fishes[i].pos.x, Fishes[i].pos.y, Fishes[i].size, Fishes[i].size }; 
-            Vector2 origin = { 0.0f, 0.0f };
-            DrawTexturePro(fishTexture, sourceRec, destRec, origin, (float)Fishes[i].angle, WHITE);        };
+            Vector2 origin = { Fishes[i].size / 2.0f, Fishes[i].size / 2.0f };
+            destRec.x += Fishes[i].size / 2.0f;
+            destRec.y += Fishes[i].size / 2.0f;
+
+            float drawAngle = (float)Fishes[i].angle;
+
+            if (Fishes[i].toleft == false) {
+                sourceRec.width = -sourceRec.width;
+                
+                if (Fishes[i].totop) drawAngle = -drawAngle; 
+            } 
+            else {
+                if (Fishes[i].totop == false) drawAngle = -drawAngle;
+            } 
+            
+            DrawTexturePro(fishTexture, sourceRec, destRec, origin, drawAngle, WHITE);        
+        }
         EndDrawing();
     }
     CloseWindow();
