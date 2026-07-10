@@ -26,6 +26,16 @@ int main(void){
     sheight = GetMonitorHeight(GetCurrentMonitor());   
     
     Image basefish = LoadImage("fish.png");
+    Color *pixels = (Color *)basefish.data;
+    
+    for (int i = 0; i < basefish.width * basefish.height; i++) {
+        if (pixels[i].r > 200 && pixels[i].g > 180 && pixels[i].b < 100) {
+            pixels[i].r = 255;
+            pixels[i].g = 255;
+            pixels[i].b = 255;
+        }
+    }
+    
     Texture2D fishTexture = LoadTextureFromImage(basefish);
     UnloadImage(basefish); 
     
