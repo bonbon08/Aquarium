@@ -3,7 +3,7 @@
 #include <math.h>
 #include <time.h>
 
-#define NUM_FISH 50
+#define NUM_FISH 200
 
 typedef struct Fish {
     float size;
@@ -12,6 +12,7 @@ typedef struct Fish {
     bool toleft;
     bool totop;
     float speed; 
+    Color color;
 } Fish;
 
 int main(void){
@@ -21,10 +22,13 @@ int main(void){
     Color bgcolor = {81, 141, 214, 255};
     
     InitWindow(swidth, sheight, "Aquarium");
-
+    swidth = GetMonitorWidth(GetCurrentMonitor());
+    sheight = GetMonitorHeight(GetCurrentMonitor());   
+    
     Image basefish = LoadImage("fish.png");
     Texture2D fishTexture = LoadTextureFromImage(basefish);
     UnloadImage(basefish); 
+    
     struct Fish Fishes[NUM_FISH];
     for(int i = 0; i < NUM_FISH; i++){
         Fishes[i].size = (float)((rand() % (200 - 100 + 1)) + 100);
@@ -33,11 +37,16 @@ int main(void){
             (float)(rand() % (int)(sheight - Fishes[i].size)) 
         };
         Fishes[i].speed = (float)((rand() % (3 - 1 + 1)) + 1);
-        
         Fishes[i].angle = rand() % 26; 
-        
         Fishes[i].toleft = (rand() % 2 == 0);
         Fishes[i].totop = (rand() % 2 == 0);
+        
+        Fishes[i].color = (Color){ 
+            (unsigned char)(rand() % 256), 
+            (unsigned char)(rand() % 256), 
+            (unsigned char)(rand() % 256), 
+            255 
+        };
     }
 
     SetTargetFPS(60);
@@ -92,17 +101,18 @@ int main(void){
 
             if (Fishes[i].toleft == false) {
                 sourceRec.width = -sourceRec.width;
-                
                 if (Fishes[i].totop) drawAngle = -drawAngle; 
             } 
             else {
                 if (Fishes[i].totop == false) drawAngle = -drawAngle;
             } 
             
-            DrawTexturePro(fishTexture, sourceRec, destRec, origin, drawAngle, WHITE);        
+            DrawTexturePro(fishTexture, sourceRec, destRec, origin, drawAngle, Fishes[i].color);        
         }
         EndDrawing();
     }
+    
+    UnloadTexture(fishTexture);
     CloseWindow();
     return 0;
 }
