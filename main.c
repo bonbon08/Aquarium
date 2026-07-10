@@ -15,16 +15,37 @@ typedef struct Fish {
     Color color;
 } Fish;
 
+int swidth = 1920;
+int sheight = 1080;
+
+void createFishes(Fish fishes[], int count) {
+    for(int i = 0; i < count; i++) {
+        fishes[i].size = (float)((rand() % (200 - 100 + 1)) + 100);
+        fishes[i].pos = (Vector2){ 
+            (float)(rand() % (int)(swidth - fishes[i].size)),
+            (float)(rand() % (int)(sheight - fishes[i].size)) 
+        };
+        fishes[i].speed = (float)((rand() % (3 - 1 + 1)) + 1);
+        fishes[i].angle = rand() % 26; 
+        fishes[i].toleft = (rand() % 2 == 0);
+        fishes[i].totop = (rand() % 2 == 0);
+        
+        fishes[i].color = (Color){ 
+            (unsigned char)(rand() % 256), 
+            (unsigned char)(rand() % 256), 
+            (unsigned char)(rand() % 256), 
+            255 
+        };
+    }
+}
+
 int main(void){
-    int swidth = 1920;
-    int sheight = 1080;
     srand(time(NULL));
     Color bgcolor = {81, 141, 214, 255};
     
     InitWindow(swidth, sheight, "Aquarium");
     swidth = GetMonitorWidth(GetCurrentMonitor());
     sheight = GetMonitorHeight(GetCurrentMonitor());   
-    
     Image basefish = LoadImage("fish.png");
     Color *pixels = (Color *)basefish.data;
     
@@ -39,25 +60,8 @@ int main(void){
     Texture2D fishTexture = LoadTextureFromImage(basefish);
     UnloadImage(basefish); 
     
-    struct Fish Fishes[NUM_FISH];
-    for(int i = 0; i < NUM_FISH; i++){
-        Fishes[i].size = (float)((rand() % (200 - 100 + 1)) + 100);
-        Fishes[i].pos = (Vector2){ 
-            (float)(rand() % (int)(swidth - Fishes[i].size)),
-            (float)(rand() % (int)(sheight - Fishes[i].size)) 
-        };
-        Fishes[i].speed = (float)((rand() % (3 - 1 + 1)) + 1);
-        Fishes[i].angle = rand() % 26; 
-        Fishes[i].toleft = (rand() % 2 == 0);
-        Fishes[i].totop = (rand() % 2 == 0);
-        
-        Fishes[i].color = (Color){ 
-            (unsigned char)(rand() % 256), 
-            (unsigned char)(rand() % 256), 
-            (unsigned char)(rand() % 256), 
-            255 
-        };
-    }
+    Fish Fishes[NUM_FISH];
+    createFishes(Fishes, NUM_FISH);
 
     SetTargetFPS(60);
     ToggleFullscreen();
